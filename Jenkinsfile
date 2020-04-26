@@ -7,7 +7,7 @@ def artifactory_url = (env.ARTIFACTORY_URL != null) ? "${env.ARTIFACTORY_URL}" :
 
 
 pipeline {
-    
+
     agent none
 
     parameters {
@@ -17,15 +17,14 @@ pipeline {
         string(name: 'profile',)
     }
 
-    def product = (params.product != null) ? "${params.product}" : "App/1.0@mycompany/stable"
-    def build_name = (params.build_name != null) ? "${params.build_name}" : "App/develop"
-    def build_number = (params.build_number != null) ? "${params.build_number}" : "2"
-    def profile = (params.profile != null) ? "${params.profile}" : "release-gcc6"
-
     stages {
         stage("Create, test and promote debian package") {
             steps {
                 script {
+                    def product = (params.product != null) ? "${params.product}" : "App/1.0@mycompany/stable"
+                    def build_name = (params.build_name != null) ? "${params.build_name}" : "App/develop"
+                    def build_number = (params.build_number != null) ? "${params.build_number}" : "2"
+                    def profile = (params.profile != null) ? "${params.profile}" : "release-gcc6"
                     docker.image("conanio/gcc6").inside("--net=host") {
                         // promote libraries to develop
                         withEnv(["CONAN_USER_HOME=${env.WORKSPACE}/conan_cache"]) {
