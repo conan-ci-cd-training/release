@@ -33,7 +33,7 @@ pipeline {
                                 sh "conan remote add ${conan_develop_repo} http://${artifactory_url}:8081/artifactory/api/conan/${conan_develop_repo}" // the namme of the repo is the same that the arttifactory key
                                 withCredentials([usernamePassword(credentialsId: 'artifactory-credentials', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASSWORD')]) {                      
                                     sh "curl -fL https://getcli.jfrog.io | sh"
-                                    sh "jfrog rt c --interactive=false  --url=http://jfrog.local:8081/artifactory --user=${ARTIFACTORY_USER} --password=${ARTIFACTORY_PASSWORD} art7"
+                                    sh "./jfrog rt c --interactive=false  --url=http://jfrog.local:8081/artifactory --user=${ARTIFACTORY_USER} --password=${ARTIFACTORY_PASSWORD} art7"
                                     ​def version = product.split("/")[1].split("@")[0]
                                     sh "conan user -p ${ARTIFACTORY_PASSWORD} -r ${conan_develop_repo} ${ARTIFACTORY_USER}"
                                     def lockfile_url = "http://${artifactory_url}:8081/artifactory/${artifactory_metadata_repo}/${build_name}/${build_number}/${product}/${profile}/conan.lock"
@@ -49,15 +49,15 @@ pipeline {
                                         sh "curl --user \"\${ARTIFACTORY_USER}\":\"\${ARTIFACTORY_PASSWORD}\" -X PUT ${deb_url} -T myapp_${version}.deb"
                                     }
                                     stage("Generate and publish build info") {
-                                        sh "jfrog rt u myapp_${version}.deb app-debian-sit-local/pool/ --build-name=${env.JOB_NAME} --build-number=${env.BUILD_NUMBER}"
-                                        sh "jfrog rt bad ${env.JOB_NAME} ${env.BUILD_NUMBER} app_release.lock"
-                                        sh "jfrog rt bp ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+                                        sh "./jfrog rt u myapp_${version}.deb app-debian-sit-local/pool/ --build-name=${env.JOB_NAME} --build-number=${env.BUILD_NUMBER}"
+                                        sh "./jfrog rt bad ${env.JOB_NAME} ${env.BUILD_NUMBER} app_release.lock"
+                                        sh "./jfrog rt bp ${env.JOB_NAME} ${env.BUILD_NUMBER}"
                                     }
                                     stage("Pass System Integration Tests") {
                                         echo "System Integration Tests OK!"
                                     }
                                     stage("Promote to UAT after tests passed") {
-                                        sh "jfrog rt bpr ${env.JOB_NAME} ${env.BUILD_NUMBER} app-debian-uat-local --status=\"SIT_OK\"  --comment=\"passed integration tests\" --include-dependencies=false --copy=false"
+                                        sh "./jfrog rt bpr ${env.JOB_NAME} ${env.BUILD_NUMBER} app-debian-uat-local --status=\"SIT_OK\"  --comment=\"passed integration tests\" --include-dependencies=false --copy=false"
                                     }
                                 }
                             }
