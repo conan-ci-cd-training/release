@@ -29,10 +29,10 @@ pipeline {
                         def scmVars = checkout scm
                         withEnv(["CONAN_USER_HOME=${env.WORKSPACE}/conan_cache"]) {
                             try {
+                                ​def version = product.split("/")[1].split("@")[0]
                                 sh "conan config install ${config_url}"
-                                sh "conan remote add ${conan_develop_repo} http://${artifactory_url}:8081/artifactory/api/conan/${conan_develop_repo}" // the namme of the repo is the same that the arttifactory key
+                                sh "conan remote add ${conan_develop_repo} http://${artifactory_url}:8081/artifactory/api/conan/${conan_develop_repo}"
                                 withCredentials([usernamePassword(credentialsId: 'artifactory-credentials', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASSWORD')]) {                      
-                                    ​def version = product.split("/")[1].split("@")[0]
                                     sh "conan user -p ${ARTIFACTORY_PASSWORD} -r ${conan_develop_repo} ${ARTIFACTORY_USER}"
                                     def lockfile_url = "http://${artifactory_url}:8081/artifactory/${artifactory_metadata_repo}/${build_name}/${build_number}/${product}/${profile}/conan.lock"
                                     stage("Download product: ${product} build name: ${build_name} build number: ${build_number} lockfile for profile: ${profile}") {
