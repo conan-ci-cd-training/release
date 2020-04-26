@@ -27,9 +27,9 @@ pipeline {
                     def profile = (params.profile != "") ? "${params.profile}" : "release-gcc6"
                     docker.image("conanio/gcc6").inside("--net=host") {
                         def scmVars = checkout scm
+                        String version = product.tokenize("/")[1].split("@")[0]
                         withEnv(["CONAN_USER_HOME=${env.WORKSPACE}/conan_cache"]) {
                             try {
-                                ​def version = product.split("/")[1].split("@")[0]
                                 sh "conan config install ${config_url}"
                                 sh "conan remote add ${conan_develop_repo} http://${artifactory_url}:8081/artifactory/api/conan/${conan_develop_repo}"
                                 withCredentials([usernamePassword(credentialsId: 'artifactory-credentials', usernameVariable: 'ARTIFACTORY_USER', passwordVariable: 'ARTIFACTORY_PASSWORD')]) {                      
