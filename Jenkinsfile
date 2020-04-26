@@ -1,31 +1,9 @@
-import groovy.json.JsonOutput
-
 def config_url = "https://github.com/conan-ci-cd-training/settings.git"
 
 def artifactory_metadata_repo = "conan-metadata"
 def conan_develop_repo = "conan-develop"
 def conan_tmp_repo = "conan-tmp"
 def artifactory_url = (env.ARTIFACTORY_URL != null) ? "${env.ARTIFACTORY_URL}" : "jfrog.local"
-
-def build_order_file = "bo.json"
-def build_order = null
-
-def profiles = [
-  "debug-gcc6": "conanio/gcc6",	
-  "release-gcc6": "conanio/gcc6"	
-]
-
-def build_result = [:]
-
-def user = "mycompany"
-def channel = "stable"
-
-def products = [
-  "App/1.0@mycompany/stable": "https://github.com/conan-ci-cd-training/App.git",	
-  "App2/1.0@mycompany/stable": "https://github.com/conan-ci-cd-training/App2.git"	
-]
-
-def affected_products = []
 
 
 pipeline {
