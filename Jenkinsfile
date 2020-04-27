@@ -28,7 +28,7 @@ pipeline {
                     docker.image("conanio/gcc6").inside("--net=host") {
                         def scmVars = checkout scm
                         String version = product.tokenize("/")[1].split("@")[0]
-                        withEnv(["CONAN_USER_HOME=${env.WORKSPACE}/conan_cache"]) {
+                        withEnv(["CONAN_USER_HOME=${env.WORKSPACE}/conan_cache","JFROG_CLI_HOME_DIR=/tmp"]) {
                             try {
                                 sh "conan config install ${config_url}"
                                 sh "conan remote add ${conan_develop_repo} http://${artifactory_url}:8081/artifactory/api/conan/${conan_develop_repo}"
