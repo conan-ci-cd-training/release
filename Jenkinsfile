@@ -48,17 +48,17 @@ pipeline {
                                     }
                                     stage("Generate and publish build info") {
                                         sh "curl -o jfrog -L 'https://api.bintray.com/content/jfrog/jfrog-cli-go/1.35.3/jfrog-cli-linux-386/jfrog?bt_package=jfrog-cli-linux-386'"
-                                        sh "chmod a+x jfrog"
+                                        sh "chmod a+x jfrog && printenv"
                                         sh "./jfrog rt c --interactive=false  --url=http://jfrog.local:8081/artifactory --user=${ARTIFACTORY_USER} --password=${ARTIFACTORY_PASSWORD} art7"
-                                        sh "./jfrog rt u myapp_${version}.deb app-debian-sit-local/pool/ --build-name=${env.JOB_NAME} --build-number=${env.BUILD_NUMBER}"
-                                        sh "./jfrog rt bad ${env.JOB_NAME} ${env.BUILD_NUMBER} app_release.lock"
-                                        sh "./jfrog rt bp ${env.JOB_NAME} ${env.BUILD_NUMBER}"
+                                        sh "./jfrog rt u myapp_${version}.deb app-debian-sit-local/pool/ --build-name=\"${env.JOB_NAME}\" --build-number=\"${env.BUILD_ID}\""
+                                        sh "./jfrog rt bad ${env.JOB_NAME} ${env.BUILD_ID} conan.lock"
+                                        sh "./jfrog rt bp ${env.JOB_NAME} ${env.BUILD_ID}"
                                     }
                                     stage("Pass System Integration Tests") {
                                         echo "System Integration Tests OK!"
                                     }
                                     stage("Promote to UAT after tests passed") {
-                                        sh "./jfrog rt bpr ${env.JOB_NAME} ${env.BUILD_NUMBER} app-debian-uat-local --status=\"SIT_OK\"  --comment=\"passed integration tests\" --include-dependencies=false --copy=false"
+                                        sh "./jfrog rt bpr ${env.JOB_NAME} ${env.BUILD_ID} app-debian-uat-local --status=\"SIT_OK\"  --comment=\"passed integration tests\" --include-dependencies=false --copy=false"
                                     }
                                 }
                             }
