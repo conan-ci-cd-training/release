@@ -44,7 +44,7 @@ pipeline {
                                     }
                                     stage("Upload package to SIT repo in Artifactory") {
                                         def deb_url = "http://${artifactory_url}:8081/artifactory/app-debian-sit-local/pool/myapp_${version}.deb;deb.distribution=stretch;deb.component=main;deb.architecture=x86-64" 
-                                        sh "curl --user \"\${ARTIFACTORY_USER}\":\"\${ARTIFACTORY_PASSWORD}\" -X PUT ${deb_url} -T myapp_${version}.deb"
+                                        sh "curl --user \"\${ARTIFACTORY_USER}\":\"\${ARTIFACTORY_PASSWORD}\" -X PUT \"${deb_url}\" -T myapp_${version}.deb"
                                     }
                                     stage("Generate and publish build info") {
                                         sh "curl -fL https://getcli.jfrog.io | sh"
