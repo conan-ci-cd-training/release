@@ -47,7 +47,8 @@ pipeline {
                                         sh "curl --user \"\${ARTIFACTORY_USER}\":\"\${ARTIFACTORY_PASSWORD}\" -X PUT \"${deb_url}\" -T myapp_${version}.deb"
                                     }
                                     stage("Generate and publish build info") {
-                                        sh "curl -fL https://getcli.jfrog.io | sh"
+                                        sh "curl -o jfrog -L 'https://api.bintray.com/content/jfrog/jfrog-cli-go/1.35.3/jfrog-cli-linux-386/jfrog?bt_package=jfrog-cli-linux-386'"
+                                        sh "chmod a+x jfrog"
                                         sh "./jfrog rt c --interactive=false  --url=http://jfrog.local:8081/artifactory --user=${ARTIFACTORY_USER} --password=${ARTIFACTORY_PASSWORD} art7"
                                         sh "./jfrog rt u myapp_${version}.deb app-debian-sit-local/pool/ --build-name=${env.JOB_NAME} --build-number=${env.BUILD_NUMBER}"
                                         sh "./jfrog rt bad ${env.JOB_NAME} ${env.BUILD_NUMBER} app_release.lock"
