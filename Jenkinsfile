@@ -28,6 +28,7 @@ pipeline {
                     docker.image("conanio/gcc6").inside("--net=host") {
                         def scmVars = checkout scm
                         String version = product.tokenize("/")[1].split("@")[0]
+                        String product_name = product.tokenize("/")[0]
                         withEnv(["CONAN_USER_HOME=${env.WORKSPACE}/conan_cache","JFROG_CLI_HOME_DIR=/tmp"]) {
                             try {
                                 sh "conan config install ${config_url}"
@@ -40,18 +41,18 @@ pipeline {
                                     }
                                     stage("Create Debian Package") {
                                         sh "conan install ${product} --lockfile conan.lock -g deploy -r ${conan_develop_repo}"
-                                        String product_name = product.tokenize("/")[0]
+                                        
                                         sh "./generateDebianPkg.sh ${version} ${product_name}"
                                     }
                                     stage("Upload package to SIT repo in Artifactory") {
-                                        def deb_url = "http://${artifactory_url}:8081/artifactory/app-debian-sit-local/pool/myapp_${version}.deb;deb.distribution=stretch;deb.component=main;deb.architecture=x86-64" 
-                                        sh "curl --user \"\${ARTIFACTORY_USER}\":\"\${ARTIFACTORY_PASSWORD}\" -X PUT \"${deb_url}\" -T myapp_${version}.deb"
+                                        def deb_url = "http://${artifactory_url}:8081/artifactory/app-debian-sit-local/pool/${product_name}_${version}.deb;deb.distribution=stretch;deb.component=main;deb.architecture=x86-64" 
+                                        sh "curl --user \"\${ARTIFACTORY_USER}\":\"\${ARTIFACTORY_PASSWORD}\" -X PUT \"${deb_url}\" -T ${product_name}_${version}.deb"
                                     }
                                     stage("Generate and publish build info") {
                                         sh "curl -o jfrog -L 'https://api.bintray.com/content/jfrog/jfrog-cli-go/1.35.3/jfrog-cli-linux-386/jfrog?bt_package=jfrog-cli-linux-386'"
                                         sh "chmod a+x jfrog && printenv"
                                         sh "./jfrog rt c --interactive=false  --url=http://jfrog.local:8081/artifactory --user=${ARTIFACTORY_USER} --password=${ARTIFACTORY_PASSWORD} art7"
-                                        sh "./jfrog rt u myapp_${version}.deb app-debian-sit-local/pool/ --build-name=\"${env.JOB_NAME}\" --build-number=\"${env.BUILD_ID}\""
+                                        sh "./jfrog rt u ${product_name}_${version}.deb app-debian-sit-local/pool/ --build-name=\"${env.JOB_NAME}\" --build-number=\"${env.BUILD_ID}\""
                                         sh "./jfrog rt bad ${env.JOB_NAME} ${env.BUILD_ID} conan.lock"
                                         sh "./jfrog rt bp ${env.JOB_NAME} ${env.BUILD_ID}"
                                     }
