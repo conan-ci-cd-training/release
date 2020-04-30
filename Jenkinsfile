@@ -40,7 +40,8 @@ pipeline {
                                     }
                                     stage("Create Debian Package") {
                                         sh "conan install ${product} --lockfile conan.lock -g deploy -r ${conan_develop_repo}"
-                                        sh "./generateDebianPkg.sh ${version}"
+                                        String product_name = product.tokenize("/")[0]
+                                        sh "./generateDebianPkg.sh ${version} ${product_name}"
                                     }
                                     stage("Upload package to SIT repo in Artifactory") {
                                         def deb_url = "http://${artifactory_url}:8081/artifactory/app-debian-sit-local/pool/myapp_${version}.deb;deb.distribution=stretch;deb.component=main;deb.architecture=x86-64" 
